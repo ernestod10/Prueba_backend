@@ -1,13 +1,13 @@
 # Prueba_backend
 
- Backend basico En node.js express y typescript
+## Backend basico En node.js express y typescript
 Start
 
 ```
 npx ts-node src/index.ts
 ```
 
-Singup
+## Singup
 
 ```
 http://localhost:3000/signup
@@ -21,7 +21,7 @@ Body(json):
 }
 ```
 
-Login
+## Login
 
 ```
 http://localhost:3000/login
@@ -33,11 +33,22 @@ Body(json):
 }
 ```
 
-Logout
+## Logout
 
+```
+http://localhost:3000/login
+```
 
-Logged Users
+## buscar Logged User
 
+la busqueda se hace por el cookie.auth que se devuelve al login, se verifica que este logeado y que no este expirado y devuelve los datos del usuario
 
+```
+http://localhost:3000/user
+```
 
-All Users
+## List All Users
+
+```
+http://localhost:3000/users
+```
