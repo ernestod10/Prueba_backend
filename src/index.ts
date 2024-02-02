@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from 'cookie-parser';
 import User,{ IUser } from "./user/UserModel";
-import auth from "./auth/auth";
 import bodyParser  from "body-parser";
 
 dotenv.config();
@@ -64,7 +63,83 @@ app.post('/signup', (req:Request, res:Response) => {
 
 });
 
+//Login Route
+app.post('/login', (req:Request, res:Response) => {
+  User.findOne({
+    username: req.body.username
+  }).then((user:IUser | null) => {
+    if (!user) {
+      return Promise.reject();
+    }
+    return user.comparePassword(req.body.password).then((isMatch:boolean) => {
+      if (!isMatch) {
+        return Promise.reject();
+      }
+      var token = user.generateToken();
+      return user.save().then(() => {
+        res.cookie('auth', token).send('Login exitoso');
+      });
+    });
+  }).catch(() => {
+    res.status(401).send('Usuario o contraseña incorrectos');
+  });
+}
+);
 
+//Logout Route
+app.get('/logout', (req:Request, res:Response) => {
+  try {
+  const token = req.cookies.auth;
+  if (!token) {
+    return res.status(401).send('No estas logueado');
+  }
+  User.findByToken(token).then((user: IUser | null) => {
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }return user.deleteToken(token).then(() => {
+      res.clearCookie('auth').send('Logout exitoso');
+    }).catch((error: any) => {
+      console.error('Error:', error);
+      res.status(500).send('Internal Server Error');
+    });
+  }).catch((error: any) => {
+    console.error('Error encontrando al usuario:', error);
+    res.status(500).send('Internal Server Error');
+  });} catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+//search logged user
+app.get('/user', (req:Request, res:Response) => {
+  try {const token = req.cookies.auth;
+  if (!token) {
+    return res.status(401).send('No estas logueado');
+  }
+  User.findByToken(token).then((user: IUser | null) => {
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+    res.send(user);
+  }).catch((error: any) => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+} catch (error) {
+  console.error('Error:', error);
+  res.status(500).send('Internal Server Error');}
+});
+
+//list all users
+app.get('/users', (req:Request, res:Response) => {
+  User.find().then((users:IUser[]) => {
+    res.send(users);
+  }).catch((error: any) => {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  });
+});
 
 //Listening
 app.listen(port, () => {
