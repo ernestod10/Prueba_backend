@@ -62,8 +62,12 @@ userSchema.methods.checkToken = function (): boolean {
 //Busca usuario por token para
 userSchema.statics.findByToken = async function (token: string): Promise<IUser | null> {
     try {
-        const decodedToken = jwt.verify(token, process.env.SECRET || '') as { _id: string };
-        return await this.findOne({ _id: decodedToken._id, token: token });
+        const decodedToken = jwt.verify(token, process.env.SECRET || '') as { _id: string, iat: number, exp: number};
+        if (decodedToken.iat < decodedToken.exp) {
+        return await this.findOne({ _id: decodedToken._id });}
+        else {
+            return null;
+        }
     } catch (error) {
         return null;
     }

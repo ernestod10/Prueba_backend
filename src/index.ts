@@ -12,7 +12,7 @@ const app: Express = express();
 const port = process.env.PORT||3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(cookieParser());
 //Database Connection
 mongoose.Promise = global.Promise;
 mongoose.connect(db, )
@@ -112,24 +112,31 @@ app.get('/logout', (req:Request, res:Response) => {
 });
 
 //search logged user
-app.get('/user', (req:Request, res:Response) => {
-  try {const token = req.cookies.auth;
-  if (!token) {
-    return res.status(401).send('No estas logueado');
-  }
-  User.findByToken(token).then((user: IUser | null) => {
-    if (!user) {
-      return res.status(404).send('Usuario no encontrado');
+app.get('/user', (req: Request, res: Response) => {
+  try {
+    const token = req.cookies.auth;
+    if (!token) {
+      return res.status(401).send('No estás logueado');
     }
-    res.send(user);
-  }).catch((error: any) => {
+    console.log(token);
+    User.findByToken(token)
+      .then((user: IUser | null) => {
+
+        if (!user) {
+          return res.status(404).send('Usuario no encontrado');
+        }
+        res.send(user);
+      })
+      .catch((error: any) => {
+
+        res.status(500).send('Internal Server Error');
+      });
+  } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
-  });
-} catch (error) {
-  console.error('Error:', error);
-  res.status(500).send('Internal Server Error');}
+  }
 });
+
 
 //list all users
 app.get('/users', (req:Request, res:Response) => {
