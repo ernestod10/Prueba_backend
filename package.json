@@ -38,10 +38,9 @@
     "@types/mocha": "^10.0.6",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^20.11.13",
-    "@types/sinon": "^17.0.3",
     "chai": "^5.0.3",
     "mocha": "^10.2.0",
-    "sinon": "^17.0.1",
+    "nyc": "^15.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
